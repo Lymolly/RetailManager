@@ -1,0 +1,8 @@
+﻿CREATE TABLE [dbo].[Inventory]
+(
+	[Id] INT NOT NULL PRIMARY KEY IDENTITY,
+	[ProductId] INT NOT NULL,
+	[Quntity] INT DEFAULT 1 NOT NULL,
+	[PurchasePrice] MONEY NOT NULL,
+	[PurchaseDate] DATETIME2 DEFAULT GETUTCDATE() NOT NULL,
+)
