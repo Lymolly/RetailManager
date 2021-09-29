@@ -14,6 +14,8 @@ namespace RetailManagerDesktopUI.ViewModels
     {
         private string _userName;
         private string _password;
+        private bool isErrorVisible;
+        private string errorMessage;
         private IApiHelper _apiHelper;
         public LoginViewModel(IApiHelper apiHelper)
         {
@@ -53,6 +55,33 @@ namespace RetailManagerDesktopUI.ViewModels
             }
         }
 
+        
+        public bool IsErrorVisible
+        {
+            get
+            {
+                bool output = false;
+                if (ErrorMessage?.Length > 0)
+                {
+                    output = true;
+                }
+
+                return output;
+            }
+        }
+        
+
+        public string ErrorMessage
+        {
+            get => errorMessage;
+            set
+            {
+                NotifyOfPropertyChange(() => IsErrorVisible);
+                NotifyOfPropertyChange(() => ErrorMessage);
+                errorMessage = value;
+            }
+        }
+
 
 
         public async Task LogIn()
@@ -63,7 +92,7 @@ namespace RetailManagerDesktopUI.ViewModels
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                ErrorMessage = e.Message;
             }
         }
 

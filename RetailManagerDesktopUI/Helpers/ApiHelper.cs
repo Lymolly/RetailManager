@@ -33,12 +33,6 @@ namespace RetailManagerDesktopUI.Helpers
 
         public async Task<AuthenticateUser> Authenticate(string username, string password)
         {
-            //Dictionary<string, string> dataToSend = new Dictionary<string, string>
-            //{
-            //    ["grant_type"] = "password",
-            //    ["username"] = username,
-            //    ["password"] = password
-            //};
             var data = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string,string>("grant_type","password"),
