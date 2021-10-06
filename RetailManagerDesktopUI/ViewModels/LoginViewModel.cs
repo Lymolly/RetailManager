@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
 using RetailManagerDesktopUI.Helpers;
+using RetailManagerDesktopUI.Library.Api;
 using RetailManagerDesktopUI.Models;
 
 namespace RetailManagerDesktopUI.ViewModels
@@ -16,7 +17,7 @@ namespace RetailManagerDesktopUI.ViewModels
         private string _password;
         private bool isErrorVisible;
         private string errorMessage;
-        private IApiHelper _apiHelper;
+        private readonly IApiHelper _apiHelper;
         public LoginViewModel(IApiHelper apiHelper)
         {
             _apiHelper = apiHelper;
@@ -89,6 +90,7 @@ namespace RetailManagerDesktopUI.ViewModels
             try
             {
                 var user =  await _apiHelper.Authenticate(Username, Password);
+                await _apiHelper.GetLoggedInUserInfo(user.Access_Token);
             }
             catch (Exception e)
             {

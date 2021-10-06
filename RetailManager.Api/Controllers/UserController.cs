@@ -14,12 +14,12 @@ namespace RetailManager.Api.Controllers
     public class UserController : ApiController
     {
         [HttpGet]
-        public List<UserModel> DetailsGetById()
+        public UserModel DetailsGetById()
         {
             string id = RequestContext.Principal.Identity.GetUserId();
             UserData userData = new UserData();
             var list = userData.GetUserById(id);
-            return list;
+            return list.First();
         }
     }
 }

@@ -7,19 +7,22 @@ using System.Net.Http.Headers;
 using System.Security.Authentication;
 using System.Text;
 using System.Threading.Tasks;
+using RetailManagerDesktopUI.Library.Models;
 using RetailManagerDesktopUI.Models;
 
-namespace RetailManagerDesktopUI.Helpers
+
+namespace RetailManagerDesktopUI.Library.Api
 {
     //TODO this class is just for a time(working now)
     //TODO refactor tis piece of shit
     public class ApiHelper : IApiHelper
     {
         private HttpClient ApiClient { get; set; }
-
-        public ApiHelper()
+        private ILoginUserModel _loginUser;
+        public ApiHelper(ILoginUserModel loginUser)
         {
             InitializeClient();
+            this._loginUser = loginUser;
         }
 
         private void InitializeClient()
@@ -48,9 +51,32 @@ namespace RetailManagerDesktopUI.Helpers
                 }
                 else
                 {
-                    throw new AuthenticationException(respMsg.ReasonPhrase);
+                    throw new Exception(respMsg.ReasonPhrase);
                 }
             }
+        }
+
+        public async Task GetLoggedInUserInfo(string token)
+        {
+            ApiClient.DefaultRequestHeaders.Clear();
+            ApiClient.DefaultRequestHeaders.Accept.Clear();
+            ApiClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            ApiClient.DefaultRequestHeaders.Add("Authorization",$"Bearer {token}");
+
+            using (var response = await ApiClient.GetAsync("api/User"))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsAsync<LoginUserModel>();
+                    _loginUser = result;
+                    _loginUser.Token = token;
+                }
+                else
+                {
+                    throw new Exception(response.ReasonPhrase);
+                }
+            }
+            
         }
     }
 }
