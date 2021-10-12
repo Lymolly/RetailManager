@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Caliburn.Micro;
+using RetailManagerDesktopUI.EventModels;
 using RetailManagerDesktopUI.Helpers;
 using RetailManagerDesktopUI.Library.Api;
 using RetailManagerDesktopUI.Models;
@@ -18,9 +19,11 @@ namespace RetailManagerDesktopUI.ViewModels
         private bool isErrorVisible;
         private string errorMessage;
         private readonly IApiHelper _apiHelper;
-        public LoginViewModel(IApiHelper apiHelper)
+        private IEventAggregator _eventAggregator;
+        public LoginViewModel(IApiHelper apiHelper,IEventAggregator eventAggregator)
         {
             _apiHelper = apiHelper;
+            _eventAggregator = eventAggregator;
         }
         public string Username
         {
@@ -91,6 +94,8 @@ namespace RetailManagerDesktopUI.ViewModels
             {
                 var user =  await _apiHelper.Authenticate(Username, Password);
                 await _apiHelper.GetLoggedInUserInfo(user.Access_Token);
+
+                _eventAggregator.PublishOnUIThreadAsync(new LogOnEventModel());
             }
             catch (Exception e)
             {
