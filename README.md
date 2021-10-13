@@ -1,2 +1,2 @@
 # RetailManager
-My realization of retail manager(WEB API)
+Simple(or not) retail manager realization(WEB API+WPF+Frontend)
