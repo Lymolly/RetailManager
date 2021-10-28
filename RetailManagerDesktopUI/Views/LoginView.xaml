@@ -25,7 +25,7 @@
                    HorizontalAlignment="Center" FontSize="58" FontFamily="Segoe UI Light" 
                    Margin=" 0 0 0 15">Login form</TextBlock>
         <!--Exception message-->
-        <TextBlock x:Name="ErrorMessage" Visibility="{Binding IsErrorViible,Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
+        <TextBlock x:Name="ErrorMessage" Visibility="{Binding IsErrorVisible,Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"
                    Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                    Foreground="Red" MaxWidth="300" TextWrapping="Wrap"/>
         <!--Username-->

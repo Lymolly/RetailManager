@@ -17,7 +17,13 @@ namespace RetailManagerDesktopUI.Library.Api
     //TODO refactor tis piece of shit
     public class ApiHelper : IApiHelper
     {
-        private HttpClient ApiClient { get; set; }
+        private HttpClient _apiclient;
+        public HttpClient ApiClient
+        {
+            get => _apiclient;
+            set => _apiclient = value;
+        }
+
         private ILoginUserModel _loginUser;
         public ApiHelper(ILoginUserModel loginUser)
         {

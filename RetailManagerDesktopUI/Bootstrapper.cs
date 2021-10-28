@@ -32,6 +32,7 @@ namespace RetailManagerDesktopUI
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
                 .Singleton<ILoginUserModel, LoginUserModel>()
+                .Singleton<IProductEndpoint,ProductEndpoint>()
                 .Singleton<IApiHelper, ApiHelper>();
             GetType().Assembly.GetTypes()
                 .Where(type => type.IsClass)
