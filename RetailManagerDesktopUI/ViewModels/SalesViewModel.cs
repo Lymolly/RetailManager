@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,9 +29,10 @@ namespace RetailManagerDesktopUI.ViewModels
             var products = await _productEndpoint.GetAll();
             Products = new BindingList<ProductModel>(products);
         }
+        
+        
+        
         private BindingList<ProductModel> _products;
-        private BindingList<ProductModel> _cart;
-        private string _itemQtity;
         public BindingList<ProductModel> Products
         {
             get { return _products; }
@@ -41,21 +43,50 @@ namespace RetailManagerDesktopUI.ViewModels
             }
         }
 
-        public BindingList<ProductModel> Cart { get; set; }
-        public string ItemQuantity
+        private ProductModel _selectedProduct;
+        public ProductModel SelectedProduct
+        {
+            get => _selectedProduct;
+            set
+            {
+                _selectedProduct = value;
+                NotifyOfPropertyChange(() => SelectedProduct);
+            }
+        }
+        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
+        public BindingList<CartItemModel> Cart
+        {
+            get => _cart;
+            set
+            {
+                _cart = value;
+                NotifyOfPropertyChange(() => Cart);
+            }
+        }
+        private int _itemQtity = 1;
+        public int ItemQuantity
         {
             get { return _itemQtity; }
             set
             {
                 _itemQtity = value;
                 NotifyOfPropertyChange(() => ItemQuantity);
+                NotifyOfPropertyChange(() => CanAddToCart);
             }
         }
 
         public string SubTotal
         {
-            //TODO Calulate 
-            get => "$0.00";
+            get
+            {
+                decimal subTotal = 0;
+                foreach (var item in Cart)
+                {
+                    subTotal += item.Product.RetailPrice * item.QuantityInCart;
+                }
+
+                return subTotal.ToString("C");
+            }
         }
         public string Total
         {
@@ -73,6 +104,10 @@ namespace RetailManagerDesktopUI.ViewModels
             get
             {
                 bool output = false;
+                if (ItemQuantity > 0 && SelectedProduct?.QuantityInStock >= ItemQuantity)
+                {
+                    output = true;
+                }
                 return output;
             }
         }
@@ -101,12 +136,33 @@ namespace RetailManagerDesktopUI.ViewModels
 
         public void AddToCart()
         {
+            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
+            if (existingItem != null)
+            {
+                existingItem.QuantityInCart += ItemQuantity;
 
+                //Костыль.Найти лучшее решение обновления корзины.
+                Cart.Remove(existingItem);
+                Cart.Add(existingItem);
+            }
+            else
+            {
+                CartItemModel item = new CartItemModel()
+                {
+                    Product = SelectedProduct,
+                    QuantityInCart = ItemQuantity
+                };
+                _cart.Add(item);
+            }
+            SelectedProduct.QuantityInStock -= ItemQuantity;
+            ItemQuantity = 1;
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => existingItem.DisplayInfo);
         }
 
         public void RemoveFromCart()
         {
-
+            NotifyOfPropertyChange(() => SubTotal);
         }
     }
 }
