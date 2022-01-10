@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using Caliburn.Micro;
 using RetailManagerDesktopUI.Helpers;
 using RetailManagerDesktopUI.Library.Api;
+using RetailManagerDesktopUI.Library.Helpers;
 using RetailManagerDesktopUI.Library.Models;
 using RetailManagerDesktopUI.ViewModels;
 
@@ -32,6 +33,7 @@ namespace RetailManagerDesktopUI
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
                 .Singleton<ILoginUserModel, LoginUserModel>()
+                .Singleton<IConfigHelper,ConfigHelper>()
                 .Singleton<IProductEndpoint,ProductEndpoint>()
                 .Singleton<IApiHelper, ApiHelper>();
             GetType().Assembly.GetTypes()

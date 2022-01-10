@@ -72,4 +72,7 @@
     <Build Include="dbo\StoredProc\spUserLookup.sql" />
     <Build Include="dbo\StoredProc\spProduct_GetAll.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="RetailManagerData.refactorlog" />
+  </ItemGroup>
 </Project>

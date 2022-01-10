@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using RetailManagerDesktopUI.Library.Api;
+using RetailManagerDesktopUI.Library.Helpers;
 using RetailManagerDesktopUI.Library.Models;
 
 namespace RetailManagerDesktopUI.ViewModels
@@ -14,9 +15,11 @@ namespace RetailManagerDesktopUI.ViewModels
     public class SalesViewModel : Screen
     {
         private IProductEndpoint _productEndpoint;
-        public SalesViewModel(IProductEndpoint productEndpoint)
+        IConfigHelper cfgHelper;
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
         {
             _productEndpoint = productEndpoint;
+            cfgHelper = configHelper;
         }
 
         protected override async void OnViewLoaded(object view)
@@ -29,9 +32,9 @@ namespace RetailManagerDesktopUI.ViewModels
             var products = await _productEndpoint.GetAll();
             Products = new BindingList<ProductModel>(products);
         }
-        
-        
-        
+
+
+
         private BindingList<ProductModel> _products;
         public BindingList<ProductModel> Products
         {
@@ -79,24 +82,51 @@ namespace RetailManagerDesktopUI.ViewModels
         {
             get
             {
-                decimal subTotal = 0;
-                foreach (var item in Cart)
-                {
-                    subTotal += item.Product.RetailPrice * item.QuantityInCart;
-                }
-
+                decimal subTotal = CalculateSubTotal();
                 return subTotal.ToString("C");
             }
+        }
+
+        private decimal CalculateSubTotal()
+        {
+            decimal subTotal = 0;
+            foreach (var item in Cart)
+            {
+                subTotal += item.Product.RetailPrice * item.QuantityInCart;
+            }
+
+            return subTotal;
         }
         public string Total
         {
             //TODO Calulate 
-            get => "$0.00";
+            get
+            {
+                var result = CalculateSubTotal() + CalculateTax();
+                return result.ToString();
+            }
         }
         public string Tax
         {
-            //TODO Calulate 
-            get => "$0.00";
+            get
+            {
+                decimal taxAmount = CalculateTax();
+                return taxAmount.ToString("C");
+            }
+        }
+
+        private decimal CalculateTax()
+        {
+            decimal taxAmount = 0;
+            decimal taxRate = cfgHelper.GetTaxRate() / 100;
+            foreach (var item in Cart)
+            {
+                if (item.Product.IsTaxable)
+                {
+                    taxAmount = item.Product.RetailPrice * item.QuantityInCart * taxRate;
+                }
+            }
+            return taxAmount;
         }
 
         public bool CanAddToCart
@@ -157,12 +187,16 @@ namespace RetailManagerDesktopUI.ViewModels
             SelectedProduct.QuantityInStock -= ItemQuantity;
             ItemQuantity = 1;
             NotifyOfPropertyChange(() => SubTotal);
-            NotifyOfPropertyChange(() => existingItem.DisplayInfo);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+           // NotifyOfPropertyChange(() => existingItem.DisplayInfo);
         }
 
         public void RemoveFromCart()
         {
             NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
         }
     }
 }

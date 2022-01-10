@@ -52,6 +52,8 @@
     <Compile Include="Api\IApiHelper.cs" />
     <Compile Include="Api\IProductEndpoint.cs" />
     <Compile Include="Api\ProductEndpoint.cs" />
+    <Compile Include="Helpers\ConfigHelper.cs" />
+    <Compile Include="Helpers\IConfigHelper.cs" />
     <Compile Include="Models\AuthenticateUser.cs" />
     <Compile Include="Models\CartItemModel.cs" />
     <Compile Include="Models\ILoginUserModel.cs" />
@@ -62,5 +64,6 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
