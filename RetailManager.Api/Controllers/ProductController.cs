@@ -9,7 +9,7 @@ using RetailManager.DataManager.Models;
 
 namespace RetailManager.Api.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class ProductController : ApiController
     {
         public List<ProductModel> Get()
