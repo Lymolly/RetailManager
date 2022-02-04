@@ -15,10 +15,12 @@ namespace RetailManagerDesktopUI.ViewModels
     public class SalesViewModel : Screen
     {
         private IProductEndpoint _productEndpoint;
+        private ISaleEndpoint _saleEndpoint;
         IConfigHelper cfgHelper;
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
         {
             _productEndpoint = productEndpoint;
+            _saleEndpoint = saleEndpoint;
             cfgHelper = configHelper;
         }
 
@@ -99,11 +101,10 @@ namespace RetailManagerDesktopUI.ViewModels
         }
         public string Total
         {
-            //TODO Calulate 
             get
             {
                 var result = CalculateSubTotal() + CalculateTax();
-                return result.ToString();
+                return result.ToString("C");
             }
         }
         public string Tax
@@ -119,13 +120,18 @@ namespace RetailManagerDesktopUI.ViewModels
         {
             decimal taxAmount = 0;
             decimal taxRate = cfgHelper.GetTaxRate() / 100;
-            foreach (var item in Cart)
-            {
-                if (item.Product.IsTaxable)
-                {
-                    taxAmount = item.Product.RetailPrice * item.QuantityInCart * taxRate;
-                }
-            }
+
+            taxAmount = Cart
+                .Where(i => i.Product.IsTaxable)
+                .Sum(x => x.Product.RetailPrice * x.QuantityInCart * taxRate);
+
+            //foreach (var item in Cart)
+            //{
+            //    if (item.Product.IsTaxable)
+            //    {
+            //        taxAmount += (item.Product.RetailPrice * item.QuantityInCart * taxRate);
+            //    }
+            //}
             return taxAmount;
         }
 
@@ -154,14 +160,29 @@ namespace RetailManagerDesktopUI.ViewModels
             get
             {
                 bool output = false;
-                //Make sure something in the cart
+                if (Cart.Count > 0)
+                {
+                    output = true;
+                }
+
                 return output;
             }
         }
 
-        public void CheckOut()
+        public async Task CheckOut()
         {
+            //create sale model and post to api
+            SaleModel saleModel = new SaleModel();
+            foreach (var item in Cart)
+            {
+                saleModel.SaleDetails.Add(new SaleDetailModel
+                {
+                    ProductId = item.Product.Id,
+                    Quantity = item.QuantityInCart
+                });
+            }
 
+            await _saleEndpoint.PostSale(saleModel);
         }
 
         public void AddToCart()
@@ -189,7 +210,7 @@ namespace RetailManagerDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
-           // NotifyOfPropertyChange(() => existingItem.DisplayInfo);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
 
         public void RemoveFromCart()
@@ -197,6 +218,7 @@ namespace RetailManagerDesktopUI.ViewModels
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
         }
     }
 }

@@ -30,7 +30,7 @@ namespace RetailManager.DataManager.Internal.DataAccess
         public void SaveData<T>(string storedProc, T parameters, string connectionStrName)
         {
             string connectionStr = GetConnectionString(connectionStrName);
-            using (IDbConnection connection = new SqlConnection(connectionStrName))
+            using (IDbConnection connection = new SqlConnection(connectionStr))
             {
                 connection.Execute(storedProc, parameters, commandType: CommandType.StoredProcedure);
             }

@@ -28,13 +28,17 @@ namespace RetailManagerDesktopUI
         }
         protected override void Configure()
         {
-            simpleContainer.Instance(simpleContainer);
+            simpleContainer.Instance(simpleContainer)
+                .PerRequest<IProductEndpoint, ProductEndpoint>()
+                .PerRequest<ISaleEndpoint, SaleEndpoint>();
+
             simpleContainer
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
                 .Singleton<ILoginUserModel, LoginUserModel>()
                 .Singleton<IConfigHelper,ConfigHelper>()
-                .Singleton<IProductEndpoint,ProductEndpoint>()
+                //.Singleton<IProductEndpoint,ProductEndpoint>()
+                //.Singleton<ISaleEndpoint,SaleEndpoint>()
                 .Singleton<IApiHelper, ApiHelper>();
             GetType().Assembly.GetTypes()
                 .Where(type => type.IsClass)
