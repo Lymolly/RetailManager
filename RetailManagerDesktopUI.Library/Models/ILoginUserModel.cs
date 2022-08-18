@@ -10,5 +10,6 @@ namespace RetailManagerDesktopUI.Library.Models
         string LastName { get; set; }
         string Email { get; set; }
         DateTime CreateDate { get; set; }
+        void LogOffUser();
     }
 }

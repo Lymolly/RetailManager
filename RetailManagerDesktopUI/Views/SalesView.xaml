@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RetailManagerDesktopUI.Views"
              xmlns:models="clr-namespace:RetailManagerDesktopUI.Library.Models;assembly=RetailManagerDesktopUI.Library"
+             xmlns:models1="clr-namespace:RetailManagerDesktopUI.Models"
              mc:Ignorable="d" Background="Wheat" FontSize="23"
              d:DesignHeight="550" d:DesignWidth="800">
     <Grid>
@@ -61,9 +62,9 @@
         <!-- Column 2 -->
         <TextBlock Text="Cart" Grid.Column="2" Grid.Row="1"/>
         <ListBox x:Name="Cart" Grid.Row="2" Grid.Column="2"
-                 MinHeight="200" MinWidth="150">
+                 MinHeight="200" MinWidth="150" SelectedItem="{Binding SelectedCartItem}">
             <ListBox.ItemTemplate>
-                <DataTemplate DataType="models:CartItemModel">
+                <DataTemplate DataType="models1:CartItemDisplayModel">
                     <TextBlock Text="{Binding DisplayInfo}"/>
                 </DataTemplate>
             </ListBox.ItemTemplate>

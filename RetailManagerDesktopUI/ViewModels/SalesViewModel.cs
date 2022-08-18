@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using AutoMapper;
 using Caliburn.Micro;
 using RetailManagerDesktopUI.Library.Api;
 using RetailManagerDesktopUI.Library.Helpers;
 using RetailManagerDesktopUI.Library.Models;
+using RetailManagerDesktopUI.Models;
+using CartItemModel = RetailManagerDesktopUI.Library.Models.CartItemModel;
 
 namespace RetailManagerDesktopUI.ViewModels
 {
@@ -16,29 +21,59 @@ namespace RetailManagerDesktopUI.ViewModels
     {
         private IProductEndpoint _productEndpoint;
         private ISaleEndpoint _saleEndpoint;
+        private readonly IMapper _mapper;
+        private readonly StatusInfoViewModel _statusInfo;
+        private readonly IWindowManager _windowManager;
         IConfigHelper cfgHelper;
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndpoint saleEndpoint)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper,
+            ISaleEndpoint saleEndpoint,IMapper mapper,StatusInfoViewModel statusInfo,IWindowManager windowManager
+        )
         {
             _productEndpoint = productEndpoint;
             _saleEndpoint = saleEndpoint;
+            _mapper = mapper;
+            _statusInfo = statusInfo;
+            _windowManager = windowManager;
             cfgHelper = configHelper;
         }
 
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await LoadProducts();
+            try
+            {
+                await LoadProducts();
+            }
+            catch (Exception ex)
+            {
+                dynamic settings = new ExpandoObject();
+                settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                settings.ResizeMode = ResizeMode.NoResize;
+                settings.Title = "System error";
+                if (ex.Message == "Unauthorized")
+                {
+                    _statusInfo.UpdateMessage("Unauthorized access", "You dont have a permission");
+                    await _windowManager.ShowDialogAsync(_statusInfo, null, settings);
+                }
+                else
+                {
+                    _statusInfo.UpdateMessage("Fatal error", ex.Message);
+                    await _windowManager.ShowDialogAsync(_statusInfo, null, settings);
+                }
+                await TryCloseAsync();
+            }
         }
         private async Task LoadProducts()
         {
-            var products = await _productEndpoint.GetAll();
-            Products = new BindingList<ProductModel>(products);
+            var productList = await _productEndpoint.GetAll();
+            var products = _mapper.Map<List<ProductDisplayModel>>(productList);
+            Products = new BindingList<ProductDisplayModel>(products);
         }
 
 
 
-        private BindingList<ProductModel> _products;
-        public BindingList<ProductModel> Products
+        private BindingList<ProductDisplayModel> _products;
+        public BindingList<ProductDisplayModel> Products
         {
             get { return _products; }
             set
@@ -48,18 +83,41 @@ namespace RetailManagerDesktopUI.ViewModels
             }
         }
 
-        private ProductModel _selectedProduct;
-        public ProductModel SelectedProduct
+        private ProductDisplayModel _selectedProduct;
+        public ProductDisplayModel SelectedProduct
         {
             get => _selectedProduct;
             set
             {
                 _selectedProduct = value;
                 NotifyOfPropertyChange(() => SelectedProduct);
+                NotifyOfPropertyChange(() => CanAddToCart);
             }
         }
-        private BindingList<CartItemModel> _cart = new BindingList<CartItemModel>();
-        public BindingList<CartItemModel> Cart
+
+        private async Task resetSalesViewModel()
+        {
+            Cart = new BindingList<CartItemDisplayModel>();
+            await LoadProducts();
+            NotifyOfPropertyChange(() => SubTotal);
+            NotifyOfPropertyChange(() => Tax);
+            NotifyOfPropertyChange(() => Total);
+            NotifyOfPropertyChange(() => CanCheckOut);
+        }
+
+        private CartItemDisplayModel _selectedCartItem;
+        public CartItemDisplayModel SelectedCartItem
+        {
+            get => _selectedCartItem;
+            set
+            {
+                _selectedCartItem = value;
+                NotifyOfPropertyChange(() => SelectedProduct);
+                NotifyOfPropertyChange(() => CanRemoveFromCart);
+            }
+        }
+        private BindingList<CartItemDisplayModel> _cart = new BindingList<CartItemDisplayModel>();
+        public BindingList<CartItemDisplayModel> Cart
         {
             get => _cart;
             set
@@ -152,6 +210,10 @@ namespace RetailManagerDesktopUI.ViewModels
             get
             {
                 bool output = false;
+                if (SelectedCartItem != null && SelectedCartItem?.QuantityInCart > 0)
+                {
+                    output = true;
+                }
                 return output;
             }
         }
@@ -183,27 +245,28 @@ namespace RetailManagerDesktopUI.ViewModels
             }
 
             await _saleEndpoint.PostSale(saleModel);
+            await resetSalesViewModel();
         }
 
         public void AddToCart()
         {
-            CartItemModel existingItem = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
-            if (existingItem != null)
+            CartItemDisplayModel existingItemDisplay = Cart.FirstOrDefault(x => x.Product == SelectedProduct);
+            if (existingItemDisplay != null)
             {
-                existingItem.QuantityInCart += ItemQuantity;
+                existingItemDisplay.QuantityInCart += ItemQuantity;
 
                 //Костыль.Найти лучшее решение обновления корзины.
-                Cart.Remove(existingItem);
-                Cart.Add(existingItem);
+                //Cart.Remove(existingItemDisplay);
+                //Cart.Add(existingItemDisplay);
             }
             else
             {
-                CartItemModel item = new CartItemModel()
+                CartItemDisplayModel itemDisplay = new CartItemDisplayModel()
                 {
                     Product = SelectedProduct,
                     QuantityInCart = ItemQuantity
                 };
-                _cart.Add(item);
+                _cart.Add(itemDisplay);
             }
             SelectedProduct.QuantityInStock -= ItemQuantity;
             ItemQuantity = 1;
@@ -215,10 +278,21 @@ namespace RetailManagerDesktopUI.ViewModels
 
         public void RemoveFromCart()
         {
+            SelectedCartItem.Product.QuantityInStock += 1;
+            if (SelectedCartItem.QuantityInCart > 1)
+            {
+                SelectedCartItem.QuantityInCart -= 1;
+            }
+            else
+            {
+                Cart.Remove(SelectedCartItem);
+            }
+
             NotifyOfPropertyChange(() => SubTotal);
             NotifyOfPropertyChange(() => Tax);
             NotifyOfPropertyChange(() => Total);
             NotifyOfPropertyChange(() => CanCheckOut);
+            NotifyOfPropertyChange(() => CanAddToCart);
         }
     }
 }

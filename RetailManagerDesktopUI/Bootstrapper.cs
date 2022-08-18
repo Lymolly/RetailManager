@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using AutoMapper;
 using Caliburn.Micro;
 using RetailManagerDesktopUI.Helpers;
 using RetailManagerDesktopUI.Library.Api;
 using RetailManagerDesktopUI.Library.Helpers;
 using RetailManagerDesktopUI.Library.Models;
+using RetailManagerDesktopUI.Models;
 using RetailManagerDesktopUI.ViewModels;
+using CartItemModel = RetailManagerDesktopUI.Library.Models.CartItemModel;
 
 namespace RetailManagerDesktopUI
 {
@@ -26,10 +29,25 @@ namespace RetailManagerDesktopUI
                 "PasswordChanged"
             );
         }
+
+        private IMapper ConfigureAutomapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductModel, ProductDisplayModel>();
+                cfg.CreateMap<CartItemModel, Models.CartItemDisplayModel>();
+            });
+            var mapper = config.CreateMapper();
+            return mapper;
+        }
         protected override void Configure()
         {
+            
+            simpleContainer.Instance<IMapper>(ConfigureAutomapper());
+
             simpleContainer.Instance(simpleContainer)
                 .PerRequest<IProductEndpoint, ProductEndpoint>()
+                .PerRequest<IUserEndpoint,UserEndpoint>()
                 .PerRequest<ISaleEndpoint, SaleEndpoint>();
 
             simpleContainer

@@ -14,5 +14,15 @@ namespace RetailManagerDesktopUI.Library.Models
         public string LastName { get; set; }
         public string Email { get; set; }
         public DateTime CreateDate { get; set; }
+
+        public void LogOffUser()
+        {
+            Token = "";
+            Id = "";
+            FirstName = "";
+            LastName = "";
+            Email = "";
+            CreateDate = DateTime.MinValue;
+        }
     }
 }

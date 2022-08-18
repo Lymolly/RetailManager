@@ -44,18 +44,36 @@ namespace RetailManager.DataManager.DataAccess
                 CashierId = cashierId
             };
             sale.Total = sale.Subtotal + sale.Tax;
-            var sqlDataAccess = new SqlDataAccess();
             
-            sqlDataAccess.SaveData<SaleDBModel>("dbo.spSale_Insert", sale, "RMConnection");
-
-            sale.Id = sqlDataAccess.LoadData<int, dynamic>("dbo.spSale_Lookup",
-                new { sale.CashierId, sale.SaleDate }, "RMConnection")
-                .FirstOrDefault();
-             foreach (var item in details)
-             {
-                item.SaleId = sale.Id;
-                sqlDataAccess.SaveData("dbo.spSaleDetail_Insert", item, "RMConnection");
-             }
+            using (var sqlDataAccess = new SqlDataAccess())
+            {
+                try
+                {
+                    sqlDataAccess.StartTransaction("RMConnection");
+                    sqlDataAccess.SaveDataInTransaction("dbo.spSale_Insert", sale);
+                    sale.Id = sqlDataAccess.LoadDataInTransaction<int, dynamic>("dbo.spSale_Lookup",
+                    new { sale.CashierId, sale.SaleDate })
+                    .FirstOrDefault();
+                    foreach (var item in details)
+                    {
+                        item.SaleId = sale.Id;
+                        sqlDataAccess.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
+                    }
+                    sqlDataAccess.CommitTransaction();
+                }
+                catch
+                {
+                    sqlDataAccess.RollbackTransaction();
+                    throw;
+                }
+            }
+            
+        }
+        public List<SaleReportModel> GetSaleReport()
+        {
+            SqlDataAccess sql = new SqlDataAccess();
+            var output = sql.LoadData<SaleReportModel, dynamic>("dbo.spSale_SaleReport", new { }, "RMConnection");
+            return output;
         }
 
         

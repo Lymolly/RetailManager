@@ -9,5 +9,6 @@ namespace RetailManagerDesktopUI.Library.Api
         Task<AuthenticateUser> Authenticate(string username, string password);
         Task GetLoggedInUserInfo(string token); 
         HttpClient ApiClient { get; set; }
+        void LogOffUser();
     }
 }

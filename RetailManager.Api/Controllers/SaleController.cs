@@ -15,11 +15,29 @@ namespace RetailManager.Api.Controllers
     public class SaleController : ApiController
     {
         [HttpPost]
+        [Authorize(Roles = "Cashier")]
         public void Post(SaleModel saleModel)
         {
             string cashId = RequestContext.Principal.Identity.GetUserId();
             SaleData data = new SaleData();
             data.SaveSale(saleModel, cashId);
+        }
+        [Authorize(Roles ="Admin,Manager")]
+        [HttpGet]
+        [Route("GetSalesReport")]
+        public List<SaleReportModel> GetSalesReport()
+        {
+            if (RequestContext.Principal.IsInRole("Admin"))
+            {
+                //Do admin stuff
+            }
+            else
+            {
+                //Do manager stuff 
+            }
+            SaleData data = new SaleData();
+            var res = data.GetSaleReport();
+            return res;
         }
     }
 }

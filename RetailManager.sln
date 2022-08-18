@@ -13,6 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetailManager.DataManager",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetailManagerDesktopUI.Library", "RetailManagerDesktopUI.Library\RetailManagerDesktopUI.Library.csproj", "{FF97A7D4-A1C5-4E50-8D2C-405B2E17ACA6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataBase", "DataBase", "{B168373A-B26F-486A-90BD-30DBB660F83A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{DD4AA8B0-1963-4156-B68B-21993032CD75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WPF", "WPF", "{049731A1-CA4C-4477-AD91-312916AB597F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +50,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9DB3833C-1BB0-424F-80BB-F289954D0292} = {DD4AA8B0-1963-4156-B68B-21993032CD75}
+		{D02753FC-23BC-4F7B-8A7D-9E8921817586} = {B168373A-B26F-486A-90BD-30DBB660F83A}
+		{52893357-633E-4F48-8812-07C018A333AA} = {049731A1-CA4C-4477-AD91-312916AB597F}
+		{9974762C-BBAF-4FF2-93A6-826CD55B637E} = {DD4AA8B0-1963-4156-B68B-21993032CD75}
+		{FF97A7D4-A1C5-4E50-8D2C-405B2E17ACA6} = {049731A1-CA4C-4477-AD91-312916AB597F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E5142044-56B0-4A3B-B1F2-BF698079960F}
